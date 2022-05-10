@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
+  name: fortune-ingress
+  namespace: {{ .Chart.Name }}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Chart.Name }}.demo.octoml.ai
+    http:
+      paths:
+      - backend:
+          service:
+            name: {{ .Chart.Name }}
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
