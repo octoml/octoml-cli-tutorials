@@ -56,7 +56,7 @@ OctoML combines state-of-the-art compiler technologies (TVM, ONNX-RT, and others
 
 `octoml setup acceleration`: (Coming soon) Prompts you for information required for acceleration, including an OctoML API access token, hardware, dynamic shape disambiguation, and a choice of express mode (completes within 20 minutes) versus full acceleration (may take several hours).
 
-`octoml package`: After running `octoml setup acceleration`, your input configuration file will have additional fields required for acceleration. The package command will parse those fields, attempt multiple acceleration strategies, then generate a deployable container for your model with minimal latency.
+`octoml package`: After running `octoml setup acceleration` (coming soon), your input configuration file will have additional fields required for acceleration. The package command will parse those fields, attempt multiple acceleration strategies, then generate a deployable container for your model with minimal latency.
 
 `octoml deploy`: Same as above. You may now use this command to deploy your best-performing model container to a locally hosted endpoint.
 
