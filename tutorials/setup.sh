@@ -7,7 +7,8 @@ pip install -r requirements.txt
 # Get the bert model for the question answering demo
 python -m transformers.onnx --model=bert-large-uncased-whole-word-masking-finetuned-squad --feature=question-answering qa
 
-# For generation model, download onnx model manually from https://github.com/onnx/models/blob/main/text/machine_comprehension/gpt-2/model/gpt2-lm-head-10.onnx
+# Get the gpt2 model for the generation model
+wget https://github.com/onnx/models/blob/main/text/machine_comprehension/gpt-2/model/gpt2-lm-head-10.onnx -O generation/gpt2-lm-head-10.onnx
 
 # Install ariel lib
 pip install ../../ariel
