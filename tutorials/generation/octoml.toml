@@ -1,9 +1,0 @@
-[models.gpt2-lm-head-10]
-path = 'gpt2-lm-head-10.onnx'
-
-[models.gpt2-lm-head-10.inputs]
-input1.shape = [1, 100]
-input1.dtype = "int64"
-
-attention_mask.shape = [1, 100]
-attention_mask.dtype = "int64"
