@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "ariel"
+version = "0.1.0"
+description = ""
+authors = ["Luis Vega <vegaluisjose@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+grpcio = "^1.43.0"
+tritonclient = "^2.17.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

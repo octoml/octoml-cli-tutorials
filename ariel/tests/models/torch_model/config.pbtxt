@@ -1,0 +1,26 @@
+name: "torch_model"
+platform: "pytorch_libtorch"
+input [
+  {
+    name: "input__0"
+    data_type: TYPE_FP32
+    dims: [ 3, 4 ]
+  },
+  {
+    name: "input__1"
+    data_type: TYPE_FP32
+    dims: [ 3, 4 ]
+  }
+]
+output [
+  {
+    name: "output__0"
+    data_type: TYPE_FP32
+    dims: [ 3, 4 ]
+  },
+  {
+    name: "output__1"
+    data_type: TYPE_FP32
+    dims: [ 3, 4 ]
+  }
+]
