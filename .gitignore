@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# octoml
+.octoml_cache
+
+# debris from setup.sh
+awscliv2.zip
+generation/gpt2-lm-head-10.onnx
+qa/
