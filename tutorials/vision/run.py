@@ -1,10 +1,14 @@
 import argparse
 import numpy as np
-from onnxruntime import InferenceSession
 from PIL import Image
 import tritonclient.grpc as grpc_client
 from ariel import function_from_model
 
+# onnxruntime doesn't support python 3.10
+try:
+    from onnxruntime import InferenceSession
+except ImportError:
+    print("onnxruntime doesn't support python 3.10: use --triton, --local won't work")
 
 def image_preprocess(imgs):
     processed_imgs = []
@@ -32,7 +36,7 @@ def run_local():
     # Preprocess input image
     image = Image.open("cat_input_images/prey1.jpeg")
     processed_img = image_preprocess([image])[0]
-    
+
     # Initialize the model
     session = InferenceSession('critterblock.onnx')
 
@@ -43,12 +47,12 @@ def run_local():
     interpret_cat_scores(pred)
 
 
-def run_triton(port):
+def run_triton(port, hostname="localhost"):
     # Preprocess input image
     image = Image.open("cat_input_images/prey1.jpeg")
-    
+
     # Initialize the model 
-    model = function_from_model("critterblock", preprocessing=image_preprocess, port=port)
+    model = function_from_model("critterblock", preprocessing=image_preprocess, port=port, hostname=hostname)
 
     # Run inference
     pred = model(image)
@@ -57,15 +61,16 @@ def run_triton(port):
     interpret_cat_scores(pred)
 
 
-if __name__ == "__main__":  
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Choose mode to run inference in.')
     parser.add_argument("--local", default=False, action="store_true")
     parser.add_argument("--triton", default=False, action="store_true")
+    parser.add_argument("--hostname", default="localhost")
     parser.add_argument("--port", default=8001)
     args = parser.parse_args()
 
     if args.local:
         run_local()
-    
+
     if args.triton:
-        run_triton(args.port)
+        run_triton(args.port, args.hostname)
