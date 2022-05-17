@@ -4,4 +4,4 @@ Pillow==9.1.0
 torch==1.11.0
 transformers==4.18.0
 tritonclient[grpc]==2.21.0
-onnxruntime==1.8.0
+tritonclient[all]==2.21.0
