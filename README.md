@@ -54,3 +54,4 @@ See the tutorials folder for how to deploy OctoML model containers to downstream
 OctoML by default collects telemetry on your usage of the CLI. However, we do not collect your specific model unless you decide to sign up for access to the OctoML platform and submit your OctoML API access token.
 
 The first time you run the CLI's `octoml init` command, you will get prompted on whether you'd like to opt out of telemetry. You can also decide to opt out of telemetry anytime by setting the following environment variable: `export OCTOML_TELEMETRY=false`.
+ohai
