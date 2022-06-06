@@ -30,3 +30,11 @@ spec:
           protocol: TCP
       imagePullSecrets:
       - name: {{ .Values.imagePullSecret }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 6 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}

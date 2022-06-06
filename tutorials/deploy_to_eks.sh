@@ -42,6 +42,16 @@ imageCredentials:
   registry: $registry
   username: AWS
   password: $(aws ecr get-login-password --profile "$SANDBOX_DEV_PROFILE" --region "$REGION")
+
+
+tolerations:
+ - key: "octoml.ai/octomizer-platform"
+   operator: "Equal"
+   value: "aws-c6g.large"
+   effect: "NoSchedule"
+
+nodeSelector:
+  octoml.ai/octomizer-platform: "aws-c6g.large"
 EOF
 
 # Install helm chart to the EKS cluster via helm
@@ -51,6 +61,6 @@ fi
 
 helm repo update octoml-cli-tutorials
 
-helm install "$MODEL_NAME" octoml-cli-tutorials/demo -n "$MODEL_NAME" --create-namespace --values "values-${MODEL_NAME}.yaml" --atomic
+helm install "$MODEL_NAME" ./helm_chart/demo -n "$MODEL_NAME" --create-namespace --values "values-${MODEL_NAME}.yaml" --atomic --timeout 10m
 
 rm "values-$MODEL_NAME.yaml"

@@ -1,0 +1,7 @@
+imageName: 186900524924.dkr.ecr.us-west-2.amazonaws.com/gtest
+imageTag: v1
+
+imageCredentials:
+  registry: 186900524924.dkr.ecr.us-west-2.amazonaws.com/gtest
+  username: AWS
+  password: 

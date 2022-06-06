@@ -21,3 +21,17 @@ imageCredentials:
   username:
   password:
   email:
+
+tolerations: []
+## If you want to set tolerations, delete the `[]` in the line above
+## and uncomment/fill in this example block
+# - key: "octoml.ai/octomizer-platform"
+#   operator: "Equal"
+#   value: "aws-c6g.large"
+#   effect: "NoSchedule"
+
+nodeSelector: {}
+## If you want to set node selector, delete the `{}` in the line above
+## and uncomment/fill in this example block
+#  octoml.ai/octomizer-platform: "aws-c6g.large"
+#  label-key: "label-value"
