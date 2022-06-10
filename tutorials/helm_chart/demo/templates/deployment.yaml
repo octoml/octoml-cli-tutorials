@@ -14,6 +14,12 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}
+      {{- if and .Values.prometheus.enabled (not .Values.prometheus.serviceMonitor.enabled) }}
+      annotations:
+        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: {{ .Values.prometheus.metricsPort }}
+      {{- end }}
     spec:
       containers:
       - name: {{ .Release.Name }}
@@ -22,11 +28,14 @@ spec:
         args:
         - --model-repository=octoml/models
         - --strict-model-config=false
+        - --metrics-port={{ .Values.prometheus.metricsPort }}
         image: "{{ .Values.imageName}}:{{ .Values.imageTag }}"
         ports:
         - containerPort: {{ .Values.grpcPort }}
           protocol: TCP
         - containerPort: {{ .Values.httpPort }}
+          protocol: TCP
+        - containerPort: {{ .Values.prometheus.metricsPort }}
           protocol: TCP
       imagePullSecrets:
       - name: {{ .Values.imagePullSecret }}

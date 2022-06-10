@@ -13,5 +13,8 @@ spec:
     port: {{ .Values.httpPort }}
     protocol: TCP
     targetPort: {{ .Values.httpPort }}
+  - name: metrics
+    port: {{ .Values.prometheus.metricsPort }}
+    targetPort: {{ .Values.prometheus.metricsPort }}
   selector:
     app: {{ .Release.Name }}

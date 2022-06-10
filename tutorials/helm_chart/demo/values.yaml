@@ -2,8 +2,8 @@
 replicas: 1
 
 # Triton server ports
-grpcPort:   8001
-httpPort:   8000
+grpcPort: 8001
+httpPort: 8000
 
 # Name of the image pull secret
 imagePullSecret: regcred
@@ -22,6 +22,14 @@ imageCredentials:
   password:
   email:
 
+prometheus:
+  enabled: true
+  metricsPort: 8002
+  serviceMonitor:
+    enabled: false
+    prometheusInstance: default
+    labels: {}
+    honorLabels: false
 
 tolerations: []
 ## If you want to set tolerations, delete the `[]` in the line above

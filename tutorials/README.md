@@ -372,6 +372,25 @@ The following table explains the difference between the two modes
 | Purpose | Most performant package out of all optimizations attempted within 20 minutes |  Most performant package out of full optimizations attempted over several hours |
 
 
+## Metrics
+Prometheus metrics from the Triton server are exposed on `localhost:8002/metrics` by default. How metrics are scraped will depend on how you are operating your Prometheus server.
+
+If you are using the Prometheus Operator, a ServiceMonitor resource can be configured by setting the following values:
+```
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+```
+
+If you have Prometheus Kubernetes scraping enabled on your server you can add annotations to allow Prometheus to scrape the pod by setting the following values:
+```
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+```
+
 ## Troubleshooting
 
 To check for Kubernetes deployment info, run:
