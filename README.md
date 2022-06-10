@@ -22,7 +22,7 @@ To get started all you need to do is download the latest version of the OctoML C
 
 Once you have the tool you should be able to view the list of available commands by running `./octoml` in your current directory.
 
-To globally install move to an appropriate location like `/usr/local/bin` or add to your `PATH`.
+To globally install move to an appropriate location like `/usr/local/bin` or add the location of `octoml` to your `PATH` environment variable.
 
 ## Core commands
 
@@ -46,6 +46,11 @@ OctoML combines state-of-the-art compiler technologies (TVM, ONNX-RT, and others
 `octoml deploy -a` or `octoml deploy -e`: Same as above. You may now use this command to deploy your best-performing model container to a locally hosted endpoint.
 
 ## Deploying OctoML packages to production-grade microservices and applications
+
+We have a set of tutorials on deploying three different models end to end.
+* [Vision](tutorials/README.md)
+* [Text Generation](tutorials/README.md)
+* [Question Answering](tutorials/README.md)
 
 See the tutorials folder for how to deploy OctoML model containers to downstream cloud registries like ECR and Kubernetes services like EKS.
 

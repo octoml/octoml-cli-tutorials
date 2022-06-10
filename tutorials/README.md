@@ -1,8 +1,8 @@
-# Demos
+# Tutorials
 
-The demos in this directory will walk you through:
+The tutorials in this directory will walk you through how to:
 
-- ML model container generation using the `octoml` CLI
+- Create an ML model container using the `octoml` CLI
 - Local container deployment and inference via docker
 - Remote container deployment and inference via Amazon Elastic Kubernetes Service (EKS)
 - Accelerating a model to save on cloud costs by connecting to the OctoML platform
