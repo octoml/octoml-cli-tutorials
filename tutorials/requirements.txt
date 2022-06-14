@@ -1,5 +1,4 @@
 protobuf>=3.5.0,<3.20
-ariel-client-triton
 grpcio==1.41.0
 numpy==1.21.4
 Pillow==9.1.1

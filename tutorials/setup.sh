@@ -11,5 +11,22 @@ then
     exit 1
 fi
 
-# Download pretrained model into tutorials
-./download_model.sh
+MODEL="all"
+for i in "$@"; do
+  case $i in
+    -m=*|--model=*)
+      MODEL="${i#*=}"
+      shift # past argument=value
+      ;;
+    --*|-*)
+      echo "Unknown option $i"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
+
+if [[ -n "$MODEL" ]]; then
+  ./download_model.sh "$MODEL"
+fi

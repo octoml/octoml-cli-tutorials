@@ -1,85 +1,85 @@
-from __future__ import annotations
 import argparse
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
-from ariel import function_from_model
-from onnxruntime import InferenceSession
 import torch
-import numpy as np
+from typing import Union
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from transformers.modeling_outputs import CausalLMOutputWithCrossAttentions
+from onnxruntime import InferenceSession
+
+# import triton_util from parent dir
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from triton_util import TritonRemoteModel  # noqa
+
 
 MAX_SEQUENCE_LENGTH = 100
 SAMPLE_TEXT = "Hello, I'm a language model,"
 
-def tokenize_inputs(text):
+
+def onnx_model_wrapper():
+    model = InferenceSession('model.onnx')
+
+    def forward(input_ids: torch.Tensor, attention_mask: torch.Tensor, **kwargs):
+        input_feed = {
+            'input_ids': input_ids.numpy(),
+            'attention_mask': attention_mask.numpy(),
+        }
+        logits = model.run(output_names=['logits'], input_feed=input_feed)
+        return CausalLMOutputWithCrossAttentions(logits=torch.tensor(logits[0]))
+
+    return forward
+
+
+def triton_model_wrapper(server_url, model_name, protocol):
+    model = TritonRemoteModel(server_url, model_name, protocol=protocol)
+
+    def forward(input_ids: torch.Tensor, attention_mask: torch.Tensor, **kwargs):
+        input_feed = {
+            'input_ids': input_ids.numpy(),
+            'attention_mask': attention_mask.numpy(),
+        }
+        logits = model(**input_feed)
+        return CausalLMOutputWithCrossAttentions(logits=torch.tensor(logits[0]))
+
+    return forward
+
+
+def run_local():
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    encoded_inputs = tokenizer(text, return_tensors="pt")
-    return encoded_inputs
+    encoded_inputs = tokenizer(SAMPLE_TEXT, return_tensors='pt')
+    model = GPT2LMHeadModel.from_pretrained('distilgpt2', pad_token_id=tokenizer.eos_token_id)
+    model.forward = onnx_model_wrapper()
+    output = model.generate(**encoded_inputs)
+    print(tokenizer.batch_decode(output))
 
 
-def decode_outputs(outputs):
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    decoded_output = tokenizer.batch_decode(outputs)
-    return decoded_output
-
-
-def generator_from_model(port=None):
-    from transformers import GPT2LMHeadModel
-    from transformers.modeling_outputs import CausalLMOutputWithCrossAttentions
-
-    model = GPT2LMHeadModel.from_pretrained("gpt2")
+def run_triton(port: Union[str, None], hostname: str, protocol: str):
     if port is None:
-        session = InferenceSession("gpt2-lm-head-10.onnx")
-    else:
-        model_func = function_from_model("gpt2-lm-head-10", port=port)
+        port = '8000' if protocol == 'http' else '8001'
+    server_url = f'{hostname}:{port}'
 
-    def onnx_eval(*args, **kwargs):
-        input_ids = kwargs["input_ids"]
-        onnx_inputs = {}
-        # gpt2 onnx model expects an extra dimension for some reason
-        onnx_inputs["input1"] = np.expand_dims(input_ids.numpy(), axis=0)
-        if port is None:
-            onnx_out_names = [x.name for x in session.get_outputs()]
-            outputs = session.run(input_feed=onnx_inputs, output_names=onnx_out_names)
-        else:
-            outputs = model_func(**onnx_inputs)
-        # unwrap the extra dimension
-        logits = torch.tensor(outputs[0][0])
-        res = CausalLMOutputWithCrossAttentions(logits=logits)
-        return res
-
-    model.forward = onnx_eval
-
-    def _wrapper(encoded_inputs):
-        return model.generate(
-            encoded_inputs.input_ids,
-            do_sample=True,
-            temperature=0.9,
-            max_length=MAX_SEQUENCE_LENGTH,
-        )
-
-    return _wrapper
-
-def run(port=None):
-    # Preprocess input text
-    encoded_inputs = tokenize_inputs(SAMPLE_TEXT)
-
-    # Prepare model
-    model = generator_from_model(port)
-    
-    # Generate output
-    outputs = model(encoded_inputs)
-    decoded_outputs = decode_outputs(outputs)
-    print(decoded_outputs)
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    encoded_inputs = tokenizer(SAMPLE_TEXT, return_tensors='pt')
+    model = GPT2LMHeadModel.from_pretrained('distilgpt2', pad_token_id=tokenizer.eos_token_id)
+    # TODO: Replace with a more efficient way
+    # Currently way is inefficient as the remote model will be called inside a
+    # loop of autoregressive decoding.
+    model.forward = triton_model_wrapper(server_url, model_name='distilgpt2', protocol=protocol)
+    output = model.generate(**encoded_inputs)
+    print(tokenizer.batch_decode(output))
 
 
-if __name__ == "__main__":  
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Choose mode to run inference in.')
     parser.add_argument("--local", default=False, action="store_true")
     parser.add_argument("--triton", default=False, action="store_true")
-    parser.add_argument("--port", default=8001)
+    parser.add_argument("--hostname", default="localhost")
+    parser.add_argument("--port", default=None)
+    parser.add_argument("--protocol", default="grpc", choices=["grpc", "http"])
     args = parser.parse_args()
 
     if args.local:
-        run()
-    
+        run_local()
+
     if args.triton:
-        run(args.port)
+        run_triton(args.port, args.hostname, args.protocol)

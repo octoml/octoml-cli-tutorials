@@ -8,8 +8,28 @@ then
     PYTHON=python3
 fi
 
-# Get the bert model for the question answering demo
-[ -f question_answering/model.onnx ] || ${PYTHON} -m transformers.onnx --model=bert-large-uncased-whole-word-masking-finetuned-squad --feature=question-answering question_answering
+MODEL="all"
+for i in "$@"; do
+  case $i in
+    -m=*|--model=*)
+      MODEL="${i#*=}"
+      shift # past argument=value
+      ;;
+    --*|-*)
+      echo "Unknown option $i"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
 
+if [[ "$MODEL" == "all" || "$MODEL" == "qa" ]]; then
+# Get the distilbert model for the question answering demo
+  [ -f question_answering/model.onnx ] || ${PYTHON} -m transformers.onnx --model=distilbert-base-uncased-distilled-squad --feature=question-answering question_answering
+fi
+
+if [[ "$MODEL" == "all" || "$MODEL" == "gpt" ]]; then
 # Get the gpt2 model for the generation model
-[ -f generation/gpt2-lm-head-10.onnx ] || curl -fsSL -o generation/gpt2-lm-head-10.onnx https://github.com/onnx/models/raw/main/text/machine_comprehension/gpt-2/model/gpt2-lm-head-10.onnx
+  [ -f generation/model.onnx ] || ${PYTHON} -m transformers.onnx --model=distilgpt2 --feature=causal-lm generation
+fi

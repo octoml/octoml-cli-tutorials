@@ -1,6 +1,6 @@
 ---
 models:
-  bert:
+  distilbert:
     path: model.onnx
     inputs:
       input_ids:

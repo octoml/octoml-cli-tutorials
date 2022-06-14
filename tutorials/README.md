@@ -19,11 +19,18 @@ Three example model setups are provided for you to play with:
 
 In this section we will validate the environment and install some dependencies. Make sure you've globally installed the OctoML CLI, by moving the CLI binary to an appropriate location like `/usr/local/bin` or adding it to your `$PATH`.
 
-Verify you have the `octoml` cli installed:
+Verify you have the `octoml` CLI installed and accept the TOS if needed:
 
 ```shell
 $ octoml -V
-octoml 0.2.4 (d5d534e 2022-05-14 23:38:45)
+By use of this CLI application, you agree to OctoML’s terms of use and privacy policy.
+https://octoml.ai/legals/terms-of-service/
+https://octoml.ai/legals/privacy-policy/
+? Do you wish to continue? · yes
+octoml 0.4.2 (8f3bfbd 2022-06-09 23:11:41)
+
+$ octoml -V
+octoml 0.4.2 (8f3bfbd 2022-06-09 23:11:41)
 ```
 
 Verify you have python installed. You need Python3. Python3.10 users (e.g. Ubuntu Jammy) see our [Note on Python3.10](https://github.com/octoml/octoml-cli-tutorials/tree/main/tutorials/vision#note-on-python310)
@@ -60,7 +67,7 @@ Run setup utility to install the python dependencies.
 ./setup.sh
 ```
 
-> Note: The following steps assume that your current working directory is one of the listed example model dirs above. Let's `cd` into the `vision` repository for example. 
+> Note: The following steps assume that your current working directory is one of the listed example model dirs above. Let's `cd` into the `vision` repository for example.
 
 Change Directory into the vision tutorial:
 
@@ -168,7 +175,7 @@ The script we will use to deploy to the cluster requires us to install `kubectl`
 ./setup-cloud.sh aws
 ```
 
-Authenticate to your [aws account with the aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) and test by listing eks clusters:
+Set up the AWS CLI by following the [docs here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) and test by listing eks clusters:
 
 ```
 aws eks list-clusters --profile $aws_profile --region $aws_region
@@ -209,7 +216,57 @@ Check the status of the helm deployment:
 helm list -n ${model_name}
 ```
 
-See the sections below to deploy your model to different cloud providers.
+### Using Azure AKS
+
+If you don't already have an AKS cluster set up, follow the guides from Azure to set one up, or optionally use Terraform:
+
+- [Quickstart: Deploy an Azure Kubernetes Service cluster using the Azure CLI](https://docs.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal#create-an-aks-cluster)
+- [Provision an AKS Cluster (Azure)](https://learn.hashicorp.com/tutorials/terraform/aks?in=terraform/kubernetes)
+
+The script we will use to deploy to the cluster requires us to install `kubectl` and `helm`, plus the azure cli. Run `setup-cloud.sh` to install the needed cloud utilities:
+
+```
+./setup-cloud.sh azure
+```
+
+Set up the Azure CLI by following the [docs here](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli) and test by listing aks clusters:
+
+```
+az aks list --subscription $azure_subscription_id
+```
+
+Fill in these bash variables for the arguments we will pass to the deploy script:
+
+```
+model_name=
+azure_subscription_id=
+docker_image_tag=
+cluster_name=
+resource_group_name=
+```
+
+For example:
+
+```
+model_name=critterblock
+azure_subscription_id=aaae7ed9-5144-4602-94da-680cc5e5096f
+docker_image_tag=v5
+cluster_name=test-cluster
+resource_group_name=test-cluster_group
+```
+
+Run the `deploy_to_aks.sh` script to create an artifact repository, push your image to it, and configure kubectl to connect to your cluster:
+
+```
+./deploy_to_aks.sh $model_name $azure_subscription_id $docker_image_tag $cluster_name $resource_group_name
+
+```
+
+Check the status of the helm deployment:
+
+```
+helm list -n ${model_name}
+```
 
 ### Using Google GKE
 
@@ -226,13 +283,11 @@ The script we will use to deploy to the cluster requires us to install `kubectl`
 ./setup-cloud.sh gcloud
 ```
 
-Set up the gcloud CLI by following the [docs to initialize and authorize](https://cloud.google.com/sdk/docs/initializing) and test by listing gke clusters:
+Set up the gcloud CLI by following the [docs here](https://cloud.google.com/sdk/docs/initializing) and test by listing gke clusters:
 
 ```
 gcloud container clusters list
 ```
-
-registry url ${REGION}-docker.pkg.dev/${PROJECT_NAME}/${MODEL_NAME}
 
 Fill in these bash variables for the arguments we will pass to the deploy script:
 
@@ -260,29 +315,6 @@ Run the `deploy_to_gke.sh` script to create an artifact repository, push your im
 ./deploy_to_gke.sh $model_name $gcp_project_id $docker_image_tag $cluster_name $gcp_region
 
 ```
-
-Check the status of the helm deployment:
-
-```
-helm list -n ${model_name}
-```
-
-### Using Azure AKS
-
-If you don't already have an AKS cluster set up, follow the guides from Azure to set one up, or optionally use Terraform:
-
-- [Quickstart: Deploy an Azure Kubernetes Service cluster using the Azure CLI](https://docs.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal#create-an-aks-cluster)
-- [Provision an AKS Cluster (Azure)](https://learn.hashicorp.com/tutorials/terraform/aks?in=terraform/kubernetes)
-
-The script we will use to deploy to the cluster requires us to install `kubectl` and `helm`, plus the azure cli. Run `setup-cloud.sh` to install the needed cloud utilities:
-
-```
-./setup-cloud.sh azure
-```
-
-Set up the Azure CLI 
-
-
 
 Check the status of the helm deployment:
 
@@ -325,6 +357,41 @@ To clean up the environment or if you want to try other live demos on EKS, stop 
 helm uninstall ${model_name} -n ${model_name}
 ```
 
+## Metrics
+Prometheus metrics from the Triton server are exposed on `localhost:8002/metrics` by default. How metrics are scraped will depend on how you are operating your Prometheus server.
+
+If you are using the Prometheus Operator, a ServiceMonitor resource can be configured by setting the following values:
+```
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+```
+
+**NOTE:** By default, the Prometheus ServiceMonitor resource will be created in the same namespace as the OctoML deployment. To change this behavior, set the `prometheus.serviceMonitor.namespace` value to the namespace in which you wish to create the ServiceMonitor. The namespace must be an existing one, otherwise deployment will fail.
+
+If you have Prometheus Kubernetes service discovery enabled on your server you can add annotations to allow Prometheus to scrape the pod by setting the following values:
+```
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+```
+
+### Troubleshooting
+
+To check for Kubernetes deployment info, run:
+
+```
+kubectl get all -n ${model_name}
+```
+
+To get the logs for a failed pod deployment, run the above and modify the pod name in the following command:
+
+```
+kubectl logs pod/demo-6f45998bbb-6jnlq -n ${model_name}
+```
+
 ## Accelerating your model on different hardware targets
 
 To access advanced features like model acceleration, you will need to [sign up](https://learn.octoml.ai/private-preview) for an OctoML Platform account. Once you've submitted the signup form, you will receive an email within 1 business day with instructions on how to finish setting up your account. Next, generate an API access token [here](https://app.octoml.ai/account/settings) and call `octoml setup acceleration` to store your API access token in the CLI.
@@ -360,7 +427,7 @@ If you wish to locally deploy and test inferences against the accelerated contai
 $ octoml deploy -e
 ```
 
-## Express Acceleration Mode and Full Acceleration Mode
+### Express Acceleration Mode and Full Acceleration Mode
 
 The following table explains the difference between the two modes
 
@@ -371,40 +438,6 @@ The following table explains the difference between the two modes
 | Command | `octoml package -e` | `octoml package -a` |
 | Purpose | Most performant package out of all optimizations attempted within 20 minutes |  Most performant package out of full optimizations attempted over several hours |
 
-
-## Metrics
-Prometheus metrics from the Triton server are exposed on `localhost:8002/metrics` by default. How metrics are scraped will depend on how you are operating your Prometheus server.
-
-If you are using the Prometheus Operator, a ServiceMonitor resource can be configured by setting the following values:
-```
-prometheus:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-```
-
-**NOTE:** By default, the Prometheus ServiceMonitor resource will be created in the same namespace as the OctoML deployment. To change this behavior, set the `prometheus.serviceMonitor.namespace` value to the namespace in which you wish to create the ServiceMonitor. The namespace must be an existing one, otherwise deployment will fail.
-
-If you have Prometheus Kubernetes service discovery enabled on your server you can add annotations to allow Prometheus to scrape the pod by setting the following values:
-```
-prometheus:
-  enabled: true
-  serviceMonitor:
-    enabled: false
-```
-
-## Troubleshooting
-
-To check for Kubernetes deployment info, run:
-
-```
-kubectl get all -n ${model_name}
-```
-
-To get the logs for a failed pod deployment, run the above and modify the pod name in the following command:
-
-```
-kubectl logs pod/demo-6f45998bbb-6jnlq -n ${model_name}
-```
+### Troubleshooting
 
 For Torchscript models traced on a GPU, containers will not be able to be run on CPUs in the local CLI. Please sign up for an OctoML account and upgrade to authenticated usage per the instructions above if this use case is applicable for you.

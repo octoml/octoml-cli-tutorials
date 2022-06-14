@@ -37,8 +37,10 @@ spec:
           protocol: TCP
         - containerPort: {{ .Values.prometheus.metricsPort }}
           protocol: TCP
+      {{- if .Values.imagePullSecret }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecret }}
+      {{- end }}
       {{- if .Values.tolerations }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 6 }}

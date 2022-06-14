@@ -32,7 +32,7 @@ You can now jump straight into our [tutorials](https://github.com/octoml/octoml-
 
 `octoml init`: This is the first command we recommend that you run. It helps you set up an input configuration file by prompting you for the information required for the CLI to generate a container for deployment.
 
-`octoml package`: Generates a deployment-ready Docker container for the models specified in the input configuration file. The input configuration file is required for this command to complete successfully.
+`octoml package`: Builds a deployment-ready Docker container for the models specified in the input configuration file. The input configuration file is required for this command to complete successfully.
 
 `octoml deploy`: Deploys a Docker container to a locally hosted endpoint. After completion of this command, you may run `docker ps` to confirm the a container has been successfully generated for you.
 
@@ -43,9 +43,9 @@ OctoML combines state-of-the-art compiler technologies (TVM, ONNX-RT, and others
 
 `octoml setup acceleration`: Prompts you for information required for acceleration, including an OctoML API access token, hardware, and dynamic shape disambiguation. Populates the information into your input configuration file for downstream use in `octoml package` and `octoml deploy`. If you do not wish to do so, please make sure to configure your input configuration file manually with the requisite fields for acceleration before calling `octoml package -e` or `octoml package -a`.
 
-`octoml package -e`: We recommend running acceleration in express mode, which completes within 20 minutes. If you are willing to wait for several hours for potentially better latency via a fuller exploration of the optimization space, run `octoml package -a` for full acceleration mode. Both modes return the best-performing package with minimal latency for each hardware you've selected, after exploring multiple acceleration strategies including TVM, ONNX-RT, and the native training framework.
+`octoml package -e`: We recommend running acceleration in express mode, which completes within 20 minutes. If you are willing to wait for several hours for potentially better latency via a fuller exploration of the optimization space, run `octoml package -a` for full acceleration mode. Both modes return the best-performing package with minimal latency for each hardware you've selected, after exploring multiple acceleration strategies including TVM, ONNX-RT, and the native training framework. After this step we recommend that you directly send this built container to a remote cloud repository for downstream remote usage.
 
-`octoml deploy -a` or `octoml deploy -e`: Same as above. You may now use this command to deploy your best-performing model container to a locally hosted endpoint.
+`octoml deploy -a` or `octoml deploy -e`: Only run this command if you're on hardware with an architecture matching the cloud instance for which you have accelerated the model. If you previously ran `package` on more than one hardware target, make sure to call `deploy` with a specific hardware input.
 
 ## Deploying OctoML packages to production-grade microservices and applications
 

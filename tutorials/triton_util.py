@@ -117,7 +117,7 @@ class TritonRemoteModel:
             if len(kwargs) != len(self._infer_inputs):
                 raise RuntimeError("Expect {} inputs got {}".format(len(self._infer_inputs), len(kwargs)))
             for placeholder in self._infer_inputs:
-                value = kwargs[placeholder.name]
+                value = kwargs[placeholder.name()]
                 placeholder.set_shape(value.shape)
                 placeholder.set_data_from_numpy(value)
 

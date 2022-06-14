@@ -59,6 +59,7 @@ def run_triton(port: Union[str, None], hostname: str, protocol: str):
         port = '8000' if protocol == 'http' else '8001'
 
     server_url = f'{hostname}:{port}'
+
     # Preprocess input image
     image = Image.open("cat_input_images/prey1.jpeg")
 

@@ -1,7 +1,7 @@
 ---
 models:
-  gpt2-lm-head-10:
-    path: gpt2-lm-head-10.onnx
+  distilgpt2:
+    path: model.onnx
     inputs:
       input1:
         shape:
