@@ -383,7 +383,9 @@ prometheus:
     enabled: true
 ```
 
-If you have Prometheus Kubernetes scraping enabled on your server you can add annotations to allow Prometheus to scrape the pod by setting the following values:
+**NOTE:** By default, the Prometheus ServiceMonitor resource will be created in the same namespace as the OctoML deployment. To change this behavior, set the `prometheus.serviceMonitor.namespace` value to the namespace in which you wish to create the ServiceMonitor. The namespace must be an existing one, otherwise deployment will fail.
+
+If you have Prometheus Kubernetes service discovery enabled on your server you can add annotations to allow Prometheus to scrape the pod by setting the following values:
 ```
 prometheus:
   enabled: true

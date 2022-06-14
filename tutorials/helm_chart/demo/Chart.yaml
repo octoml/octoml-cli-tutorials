@@ -1,4 +1,4 @@
 apiVersion: v2
 name: demo
 description: A Helm chart for the OctoML kubernetes triton demo
-version: 0.2.2
+version: 0.3.0
