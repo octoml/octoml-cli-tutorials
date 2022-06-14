@@ -17,8 +17,8 @@ spec:
       {{- if and .Values.prometheus.enabled (not .Values.prometheus.serviceMonitor.enabled) }}
       annotations:
         prometheus.io/path: "/metrics"
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: {{ .Values.prometheus.metricsPort }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.prometheus.metricsPort | quote }}
       {{- end }}
     spec:
       containers:
