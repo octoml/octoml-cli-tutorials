@@ -15,6 +15,10 @@ imageTag: latest
 # Hostname for the ingress
 hostname:
 
+# Service parameters
+service:
+  type: ClusterIP
+
 # Credentials for creating an image pull secret
 imageCredentials:
   registry:
